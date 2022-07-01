@@ -16,108 +16,27 @@ to_letter_N = ' '
 
 n_file1 = input()
 n_file2 = input()
-replace = int ( input() )
 f_file1 = open(n_file1, "r", encoding = "utf-8")
 f_file2 = open(n_file2, "w", encoding = "utf-8")
 f_file = open("words.txt", "w", encoding = "utf-8")
 data = readJSON.读JSON文件("data2.json")
 
-def heXieReplace1(word, line):
-	line_copy = line.lower()
-	if replace == 1: # 英文、数字、中文
-		for letter in word:
-			if letter not in eng_letter_S and letter not in eng_letter_N:
-				break
-			else:
-				error_num = 0
-				while line_copy.find(word) != -1:
-					error_num += 1
-					if error_num > 20:
-						break
-					for i in range(line_copy.find(word), line_copy.find(word) + len(word)):
-						line_list = list(line)
-						if line_list[i] in eng_letter_B:
-							line_list[i] = to_letter_B
-						elif line_list[i] in eng_letter_S:
-							line_list[i] = to_letter_S
-						elif line_list[i] in to_letter_N:
-							line_list[i] = to_letter_N
-						line = ''.join(line_list)
-						line_copy = line.lower()
-		for charactor in word:
-			if charactor not in eng_letter_B and charactor not in eng_letter_S and charactor not in eng_letter_N:
-				line = line.replace(charactor, to_charactor)
-	elif replace == 2: # 英文、无数字、中文
-		for letter in word:
-			if letter not in eng_letter_S and letter not in eng_letter_N:
-				break
-			else:
-				error_num = 0
-				while line_copy.find(word) != -1:
-					error_num += 1
-					if error_num > 20:
-						break
-					for i in range(line_copy.find(word), line_copy.find(word) + len(word)):
-						line_list = list(line)
-						if line_list[i] in eng_letter_B:
-							line_list[i] = to_letter_B
-						elif line_list[i] in eng_letter_S:
-							line_list[i] = to_letter_S
-						line = ''.join(line_list)
-						line_copy = line.lower()
-		for charactor in word:
-			if charactor not in eng_letter_B and charactor not in eng_letter_S and charactor not in eng_letter_N:
-				line = line.replace(charactor, to_charactor)
-	elif replace == 3: # 无英文、无数字、中文
-		for charactor in word:
-			if charactor not in eng_letter_B and charactor not in eng_letter_S and charactor not in eng_letter_N:
-				line = line.replace(charactor, to_charactor)
-	return line
-
 def heXieReplace2(word, line):
-	if replace == 1: # 英文、数字、中文
-		for charactor in word:
-			if  charactor in eng_letter_S:
-				line = line.replace(charactor.upper(), to_letter_B)
-				line = line.replace(charactor, to_letter_S)
-			elif charactor in eng_letter_N:
-				line = line.replace(charactor, to_letter_N)
-			else:
-				line = line.replace(charactor, to_charactor)
-	elif replace == 2: # 英文、无数字、中文
-		for charactor in word:
-			if  charactor in eng_letter_S:
-				line = line.replace(charactor.upper(), to_letter_B)
-				line = line.replace(charactor, to_letter_S)
-			elif charactor in eng_letter_N:
-				pass
-			else:
-				line = line.replace(charactor, to_charactor)
-	elif replace == 3: # 无英文、无数字、中文
-		for charactor in word:
-			if charactor in eng_letter_S:
-				pass
-			elif charactor in eng_letter_N:
-				pass
-			else:
-				line = line.replace(charactor, to_charactor)
+	for charactor in word:
+		if charactor in eng_letter_S:
+			line = line.replace(charactor.upper(), to_letter_B)
+			line = line.replace(charactor, to_letter_S)
+		elif charactor in eng_letter_N:
+			line = line.replace(charactor, to_letter_N)
+		else:
+			line = line.replace(charactor, to_charactor)
 	return line
 
-def heXie1(line, line_copy, words_type):
-# 简单脏话，一词连着出现
-	words1 = data[words_type]
-	for word1 in words1:
-		if word1 in line_copy:
-			f_file.write( word1 + " in " + line_copy)
-			for charactor in word1:
-				line = heXieReplace1(word1, line)
-	return line
-
-def heXie2(line, line_copy, words_type):
+def heXie(line, line_copy, words_type):
 # 政治黄色暴恐相关，十字之八便被和谐
 	words2 = data[words_type]
 	for word2 in words2:
-		word2_splited = list(set(list(word2)))
+		word2_splited = word2.split("+")
 		rate = 0
 		word2_splited_len = len(word2_splited)
 		for charactor in word2_splited:
@@ -126,7 +45,7 @@ def heXie2(line, line_copy, words_type):
 		if rate / word2_splited_len >= 0.7777 or rate >= 7:
 			f_file.write(str( rate / word2_splited_len * 100 ) + "% " + word2 + " in " + line_copy)
 			for charactor in word2_splited:
-				line = heXieReplace2(word2_splited, line)
+				line = heXieReplace2(charactor, line)
 	return line
 
 file1_lines = f_file1.readlines()
@@ -152,24 +71,29 @@ for line in file1_lines:
 	#line = c_t2s.convert(line)
 	#line_copy = c_t2s.convert(line_copy)
 	
-	line = heXie1(line, line_copy, "粗鄙之语")
-	line = heXie2(line, line_copy, "政治相关")
-	line = heXie2(line, line_copy, "黄赌毒暴相关")
-	line = heXie1(line, line_copy, "广告相关")
-	line = heXie2(line, line_copy, "202105")
-	line = heXie2(line, line_copy, "202106")
-	line = heXie2(line, line_copy, "202107")
-	line = heXie2(line, line_copy, "202108")
-	line = heXie2(line, line_copy, "202109")
-	line = heXie2(line, line_copy, "202110")
-	line = heXie2(line, line_copy, "202111")
-	line = heXie2(line, line_copy, "202112")
-	line = heXie2(line, line_copy, "202201")
-	line = heXie2(line, line_copy, "202202")
-	#line = heXie2(line, line_copy, "202203")
-	line = heXie1(line, line_copy, "英文粗鄙之语")
-	line = heXie1(line, line_copy, "英文政治相关")
-	#line = heXie1(line, line_copy, "英文广告相关")
+	line = heXie(line, line_copy, "粗鄙之语")
+	line = heXie(line, line_copy, "政治相关")
+	line = heXie(line, line_copy, "黄赌毒暴相关")
+	line = heXie(line, line_copy, "广告相关")
+	line = heXie(line, line_copy, "202105")
+	line = heXie(line, line_copy, "202106")
+	line = heXie(line, line_copy, "202107")
+	line = heXie(line, line_copy, "202108")
+	line = heXie(line, line_copy, "202109")
+	line = heXie(line, line_copy, "202110")
+	line = heXie(line, line_copy, "202111")
+	line = heXie(line, line_copy, "202112")
+	line = heXie(line, line_copy, "202201")
+	line = heXie(line, line_copy, "202202")
+	line = heXie(line, line_copy, "202203")
+	line = heXie(line, line_copy, "202204")
+	line = heXie(line, line_copy, "202205")
+	line = heXie(line, line_copy, "202206")
+	line = heXie(line, line_copy, "202207")
+	#line = heXie(line, line_copy, "202208")
+	line = heXie(line, line_copy, "英文粗鄙之语")
+	line = heXie(line, line_copy, "英文政治相关")
+	#line = heXie(line, line_copy, "英文广告相关")
 	
 	f_file2.write( line )
 
